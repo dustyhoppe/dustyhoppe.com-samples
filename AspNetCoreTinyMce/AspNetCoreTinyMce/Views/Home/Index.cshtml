@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<form action="#">
+    <div class="input-group">
+        <textarea class="editor"></textarea>
+    </div>
+</form>
+
+
+@section Scripts {
+    <script src="https://cdn.tiny.cloud/1/<TINY_MCE_API_KEY_HERE>/tinymce/5/tinymce.min.js"></script>
+    <script type="text/javascript">
+        tinymce.init({
+            selector: 'textarea.editor',
+            height: 500,
+            width: 800,
+            plugins: "image", // add the image plugin
+            toolbar: 'image', // add the image button to the toolbar
+            images_upload_handler: function (blobInfo, success, failure) {
+
+                // Create a JSON payload containing the file name and file bytes and serialize it to a string
+                var data = JSON.stringify({ fileBytes: blobInfo.base64(), fileName: blobInfo.blob().name });
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/images',
+                    data: data,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function (result) {
+                        success(result.imageUrl);
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")");
+                        failure(err.message);
+                    }
+                });
+            }
+        });
+    </script>
+}
